@@ -83,6 +83,7 @@
 #include "mp_transport/mp_transports.h"
 #include "utils/stats.h"
 #include "utils/util.h"
+#include "flowsign.h"
 
 #ifdef SHELL
 #include "control/control_mgmt.h"
@@ -267,6 +268,8 @@ void Snort::init(int argc, char** argv)
     LogMessage("%s\n", LOG_DIV);
 
     SFDAQ::init(sc->daq_config, ThreadConfig::get_instance_max());
+
+    FlowSignManager::get_instance().start();
 }
 
 // this function should only include initialization that must be done as a
@@ -388,6 +391,8 @@ void Snort::term()
     ScriptManager::release_scripts();
     memory::MemoryCap::term();
     detection_filter_term();
+
+    FlowSignManager::get_instance().shutdown();
 
     term_signals();
 }
