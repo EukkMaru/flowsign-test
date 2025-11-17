@@ -74,6 +74,7 @@
 #include "time/packet_time.h"
 #include "trace/trace_api.h"
 #include "utils/stats.h"
+#include "flowsign.h"
 
 #include "analyzer_command.h"
 #include "oops_handler.h"
@@ -201,6 +202,8 @@ static bool process_packet(Packet* p)
     daq_stats.rx_bytes += p->pktlen;
 
     PacketTracer::activate(*p);
+
+    FlowSignManager::get_instance().enqueue_packet(*p);
 
     p->user_inspection_policy_id = get_inspection_policy()->user_policy_id;
     p->user_ips_policy_id = get_ips_policy()->user_policy_id;
