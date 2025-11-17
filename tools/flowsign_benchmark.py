@@ -21,9 +21,11 @@ from dataclasses import dataclass
 from typing import Iterable, List, Optional, Tuple
 
 try:
-    import requests
-except ImportError as exc:  # pragma: no cover - optional dependency
-    raise SystemExit("Install requests: pip install requests") from exc
+    import requests  # type: ignore
+except ImportError:  # pragma: no cover - fallback for minimal environments
+    requests = None
+    import urllib.error
+    import urllib.request
 
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
@@ -118,11 +120,18 @@ def download_file(file: DatasetFile) -> None:
         return
 
     print(f"[download] fetching {file.url} -> {file.path}")
-    with requests.get(file.url, stream=True, timeout=30) as resp:
-        resp.raise_for_status()
-        total = 0
+    total = 0
+    if requests:
+        stream = requests.get(file.url, stream=True, timeout=30)
+        stream.raise_for_status()
+        iterator = stream.iter_content(chunk_size=8192)
+    else:
+        stream = urllib.request.urlopen(file.url, timeout=30)  # nosec: B310
+        iterator = iter(lambda: stream.read(8192), b"")
+
+    with stream:
         with open(file.path, "wb") as handle:
-            for chunk in resp.iter_content(chunk_size=8192):
+            for chunk in iterator:
                 if not chunk:
                     continue
                 total += len(chunk)
