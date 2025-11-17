@@ -10,8 +10,11 @@ importantly:
 
 - `libdaq` ≥ 3.0.22. The helper will attempt to download and build the library
   automatically into `.deps/` when it is not present (requires `curl` and build
-  tooling). You can provide `DAQ_INCLUDE_DIR_HINT`/`DAQ_LIBRARIES_DIR_HINT` or
-  `LIBDAQ_PREFIX` if you already have a custom build.
+  tooling). If your network blocks downloads, pre-seed the tarball at
+  `$LIBDAQ_TARBALL` (default: `.deps/libdaq-<ver>.tar.gz`) or point
+  `LIBDAQ_TARBALL` at an accessible local copy to skip the fetch. You can
+  provide `DAQ_INCLUDE_DIR_HINT`/`DAQ_LIBRARIES_DIR_HINT` or `LIBDAQ_PREFIX` if
+  you already have a custom build.
 - `cmake`, `pkg-config`, a C++17 toolchain, and supporting libraries referenced
   in `snort3/README.md`
 - Python 3 with `requests` installed for dataset downloads used by
@@ -33,6 +36,9 @@ DAQ_LIBRARIES_DIR_HINT=$HOME/libdaq/lib \
 
 # use an existing libdaq tree instead of downloading
 LIBDAQ_PREFIX=$HOME/libdaq-3.0.22 ./tools/build_and_test.sh nsl-kdd
+
+# or pre-seed a tarball when outbound fetches are blocked
+LIBDAQ_TARBALL=$HOME/downloads/libdaq-3.0.22.tar.gz ./tools/build_and_test.sh unsw-nb15
 ```
 
 The helper surfaces missing dependencies early and exits with a non-zero status

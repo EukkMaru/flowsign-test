@@ -30,7 +30,7 @@ LIBDAQ_SOURCE_DIR="${LIBDAQ_SOURCE_DIR:-$DEPS_DIR/libdaq-$LIBDAQ_VERSION}"
 BOOTSTRAP_LIBDAQ="${BOOTSTRAP_LIBDAQ:-1}"
 
 if [[ "$BOOTSTRAP_LIBDAQ" = "1" ]] && ! command -v curl >/dev/null 2>&1; then
-  echo "curl is required to download libdaq automatically; set BOOTSTRAP_LIBDAQ=0 to disable." >&2
+  echo "curl is required to download libdaq automatically; set BOOTSTRAP_LIBDAQ=0 or preseed LIBDAQ_TARBALL to disable." >&2
   exit 1
 fi
 
@@ -53,7 +53,15 @@ ensure_libdaq() {
   mkdir -p "$DEPS_DIR"
   if [[ ! -f "$LIBDAQ_TARBALL" ]]; then
     echo "Downloading libdaq v${LIBDAQ_VERSION} to $LIBDAQ_TARBALL" >&2
-    curl -L -o "$LIBDAQ_TARBALL" "https://github.com/snort3/libdaq/archive/refs/tags/v${LIBDAQ_VERSION}.tar.gz"
+    if ! curl -L -o "$LIBDAQ_TARBALL" "https://github.com/snort3/libdaq/archive/refs/tags/v${LIBDAQ_VERSION}.tar.gz"; then
+      cat >&2 <<'EOF'
+libdaq download failed. If your network blocks outbound fetches, place a pre-downloaded
+tarball at the path pointed to by $LIBDAQ_TARBALL (or set LIBDAQ_TARBALL to an accessible
+location) and rerun this script. You can also disable bootstrap with BOOTSTRAP_LIBDAQ=0
+when providing DAQ_INCLUDE_DIR_HINT/DAQ_LIBRARIES_DIR_HINT for an existing installation.
+EOF
+      exit 2
+    fi
   fi
 
   if [[ ! -d "$LIBDAQ_SOURCE_DIR" ]]; then
