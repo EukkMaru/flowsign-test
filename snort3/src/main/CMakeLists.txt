@@ -1,6 +1,7 @@
 
 set (INCLUDES
     analyzer_command.h
+    flowsign.h
     policy.h
     reload_tracker.h
     reload_tuner.h
@@ -34,6 +35,7 @@ add_library (main OBJECT
     help.h
     modules.cc
     modules.h
+    flowsign.cc
     network_module.cc
     network_module.h
     oops_handler.cc
